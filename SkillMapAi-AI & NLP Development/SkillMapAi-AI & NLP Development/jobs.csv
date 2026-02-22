@@ -1,0 +1,9 @@
+Job Title,Required Skills
+Python Developer,"python, sql, git, rest api"
+Data Scientist,"python, sql, machine learning, statistics"
+ML Engineer,"python, machine learning, tensorflow, pytorch"
+Backend Engineer,"python, sql, docker, kubernetes, rest api"
+Full Stack Developer,"python, javascript, react, sql, rest api"
+Frontend Developer,"javascript, react, html, css"
+DevOps Engineer,"docker, kubernetes, linux, ci/cd, python"
+Data Engineer,"python, sql, spark, etl, airflow"

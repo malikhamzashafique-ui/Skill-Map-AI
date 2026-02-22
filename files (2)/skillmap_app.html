@@ -1,0 +1,1182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SkillMap AI — Navigate Your Career</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0d14;
+    --surface: #111520;
+    --surface2: #161c2e;
+    --border: rgba(99,120,255,0.15);
+    --accent: #6378ff;
+    --accent2: #a78bfa;
+    --accent3: #34d399;
+    --warn: #f59e0b;
+    --danger: #ef4444;
+    --text: #e8eaf6;
+    --muted: #8891b4;
+    --tag-bg: rgba(99,120,255,0.12);
+    --card-glow: 0 0 40px rgba(99,120,255,0.08);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Grid background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(99,120,255,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(99,120,255,0.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Orbs */
+  .orb {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.25;
+    pointer-events: none;
+    z-index: 0;
+    animation: pulse 8s ease-in-out infinite;
+  }
+  .orb1 { width: 500px; height: 500px; background: #6378ff; top: -100px; right: -100px; animation-delay: 0s; }
+  .orb2 { width: 400px; height: 400px; background: #a78bfa; bottom: 100px; left: -100px; animation-delay: -4s; }
+  .orb3 { width: 300px; height: 300px; background: #34d399; top: 50%; right: 20%; animation-delay: -2s; opacity: 0.12; }
+  @keyframes pulse { 0%,100%{opacity:.18;transform:scale(1)} 50%{opacity:.32;transform:scale(1.08)} }
+
+  /* Layout */
+  .wrapper { position: relative; z-index: 1; max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+
+  /* NAV */
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    backdrop-filter: blur(20px);
+    background: rgba(10,13,20,0.8);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+  }
+  .nav-inner {
+    max-width: 1200px; margin: 0 auto;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 64px;
+  }
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.4rem; font-weight: 800;
+    letter-spacing: -0.5px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    cursor: pointer; text-decoration: none;
+  }
+  .logo span { -webkit-text-fill-color: var(--text); opacity: 0.5; }
+  .nav-links { display: flex; gap: 8px; }
+  .nav-link {
+    color: var(--muted); background: none; border: none;
+    padding: 8px 16px; border-radius: 8px; cursor: pointer;
+    font-family: 'DM Sans', sans-serif; font-size: 0.9rem; font-weight: 500;
+    transition: all 0.2s; text-decoration: none;
+  }
+  .nav-link:hover, .nav-link.active {
+    color: var(--text); background: var(--tag-bg);
+  }
+  .nav-cta {
+    background: var(--accent); color: #fff;
+    border: none; padding: 8px 20px; border-radius: 8px; cursor: pointer;
+    font-family: 'DM Sans', sans-serif; font-size: 0.9rem; font-weight: 600;
+    transition: all 0.2s;
+  }
+  .nav-cta:hover { background: #7b8eff; transform: translateY(-1px); }
+
+  /* Hero */
+  .hero {
+    padding: 100px 0 60px;
+    text-align: center;
+    position: relative;
+  }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--tag-bg); border: 1px solid var(--border);
+    padding: 6px 16px; border-radius: 100px;
+    font-size: 0.8rem; color: var(--accent2); font-weight: 500;
+    margin-bottom: 28px;
+    animation: fadeIn 0.6s ease both;
+  }
+  .hero-badge::before { content: '●'; font-size: 0.5rem; color: var(--accent3); }
+  .hero h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(2.8rem, 6vw, 5rem); font-weight: 800;
+    line-height: 1.05; letter-spacing: -2px;
+    margin-bottom: 24px;
+    animation: fadeUp 0.7s ease 0.1s both;
+  }
+  .hero h1 em {
+    font-style: normal;
+    background: linear-gradient(135deg, var(--accent) 30%, var(--accent2));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .hero p {
+    font-size: 1.15rem; color: var(--muted); max-width: 560px; margin: 0 auto 40px;
+    line-height: 1.7; font-weight: 300;
+    animation: fadeUp 0.7s ease 0.2s both;
+  }
+  .hero-actions {
+    display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;
+    animation: fadeUp 0.7s ease 0.3s both;
+  }
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 14px 28px; border-radius: 12px;
+    font-family: 'DM Sans', sans-serif; font-size: 0.95rem; font-weight: 600;
+    cursor: pointer; transition: all 0.2s; text-decoration: none; border: none;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: #fff;
+    box-shadow: 0 8px 32px rgba(99,120,255,0.35);
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(99,120,255,0.5); }
+  .btn-outline {
+    background: transparent; color: var(--text);
+    border: 1px solid var(--border);
+  }
+  .btn-outline:hover { background: var(--tag-bg); border-color: var(--accent); }
+
+  /* Stats */
+  .stats-bar {
+    display: flex; justify-content: center; gap: 48px;
+    padding: 32px 0; flex-wrap: wrap;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    margin: 0 0 60px;
+    animation: fadeIn 0.8s ease 0.4s both;
+  }
+  .stat { text-align: center; }
+  .stat-value {
+    font-family: 'Syne', sans-serif;
+    font-size: 2rem; font-weight: 800;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .stat-label { font-size: 0.8rem; color: var(--muted); margin-top: 2px; }
+
+  /* Sections */
+  .section { padding: 40px 0 80px; }
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.8rem; font-weight: 700; margin-bottom: 8px;
+    letter-spacing: -0.5px;
+  }
+  .section-sub { color: var(--muted); font-size: 0.95rem; margin-bottom: 32px; }
+
+  /* Skill Matcher */
+  .matcher-layout {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+  @media(max-width: 768px) { .matcher-layout { grid-template-columns: 1fr; } }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    box-shadow: var(--card-glow);
+    transition: border-color 0.2s;
+  }
+  .card:hover { border-color: rgba(99,120,255,0.3); }
+  .card-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 1rem; font-weight: 700;
+    margin-bottom: 6px; letter-spacing: 0.5px;
+    text-transform: uppercase; font-size: 0.75rem;
+    color: var(--muted);
+  }
+
+  /* Skill input area */
+  .skill-input-wrap {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px;
+    min-height: 120px;
+    cursor: text;
+    position: relative;
+    transition: border-color 0.2s;
+  }
+  .skill-input-wrap:focus-within { border-color: var(--accent); }
+  .skill-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
+  .skill-tag {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--tag-bg); border: 1px solid rgba(99,120,255,0.3);
+    color: var(--accent2); padding: 4px 12px; border-radius: 100px;
+    font-size: 0.82rem; font-weight: 500;
+    animation: tagIn 0.2s ease both;
+  }
+  @keyframes tagIn { from{opacity:0;transform:scale(0.8)} to{opacity:1;transform:scale(1)} }
+  .skill-tag .rm {
+    cursor: pointer; opacity: 0.6; font-size: 0.9rem; line-height: 1;
+    transition: opacity 0.15s; padding: 0 2px;
+  }
+  .skill-tag .rm:hover { opacity: 1; color: var(--danger); }
+  .skill-input {
+    width: 100%; background: none; border: none; outline: none;
+    color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 0.9rem;
+    caret-color: var(--accent);
+  }
+  .skill-input::placeholder { color: var(--muted); }
+
+  /* Autocomplete */
+  .autocomplete {
+    position: relative;
+  }
+  .autocomplete-list {
+    position: absolute; top: calc(100% + 4px); left: 0; right: 0; z-index: 50;
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 12px; overflow: hidden;
+    max-height: 200px; overflow-y: auto;
+    box-shadow: 0 16px 48px rgba(0,0,0,0.4);
+    display: none;
+  }
+  .autocomplete-list.show { display: block; }
+  .autocomplete-item {
+    padding: 10px 16px; cursor: pointer;
+    font-size: 0.88rem; transition: background 0.15s;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .autocomplete-item:hover, .autocomplete-item.focused {
+    background: var(--tag-bg); color: var(--accent2);
+  }
+  .autocomplete-item::before { content: '+'; color: var(--accent3); font-weight: 700; }
+
+  /* Category filter */
+  .filter-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+  .filter-btn {
+    padding: 6px 16px; border-radius: 100px;
+    border: 1px solid var(--border); background: none;
+    color: var(--muted); font-family: 'DM Sans', sans-serif; font-size: 0.82rem;
+    cursor: pointer; transition: all 0.2s; font-weight: 500;
+  }
+  .filter-btn:hover { border-color: var(--accent); color: var(--text); }
+  .filter-btn.active {
+    background: var(--accent); border-color: var(--accent); color: #fff;
+  }
+
+  /* Suggest chips */
+  .suggest-row {
+    display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px;
+  }
+  .suggest-chip {
+    display: inline-flex; align-items: center; gap: 4px;
+    background: rgba(52,211,153,0.1); border: 1px solid rgba(52,211,153,0.25);
+    color: var(--accent3); padding: 3px 10px; border-radius: 100px;
+    font-size: 0.78rem; cursor: pointer; transition: all 0.2s; font-weight: 500;
+  }
+  .suggest-chip:hover { background: rgba(52,211,153,0.2); }
+  .suggest-chip::before { content: '+'; }
+
+  /* Results */
+  .results-list { display: flex; flex-direction: column; gap: 16px; }
+  .result-card {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 14px; padding: 20px 24px;
+    transition: all 0.25s; cursor: pointer; position: relative; overflow: hidden;
+    animation: slideIn 0.3s ease both;
+  }
+  @keyframes slideIn { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+  .result-card::before {
+    content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+    background: linear-gradient(180deg, var(--accent), var(--accent2));
+    border-radius: 0 2px 2px 0;
+  }
+  .result-card:hover { border-color: rgba(99,120,255,0.4); transform: translateX(4px); }
+  .result-header { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 12px; }
+  .result-icon {
+    width: 40px; height: 40px; border-radius: 10px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem;
+    background: var(--tag-bg);
+  }
+  .result-title {
+    font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700;
+    line-height: 1.3; flex: 1;
+  }
+  .result-category {
+    font-size: 0.75rem; color: var(--muted); margin-top: 2px;
+  }
+  .result-score {
+    font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 800;
+    color: var(--accent); flex-shrink: 0;
+  }
+
+  /* Match bar */
+  .match-info { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+  .match-bar-wrap {
+    flex: 1; background: rgba(255,255,255,0.06); border-radius: 100px; height: 6px; overflow: hidden;
+  }
+  .match-bar {
+    height: 100%; border-radius: 100px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    transition: width 0.6s ease;
+  }
+  .match-bar.high { background: linear-gradient(90deg, var(--accent3), #0ea5e9); }
+  .match-bar.low { background: linear-gradient(90deg, var(--warn), var(--danger)); }
+  .match-pct { font-size: 0.8rem; color: var(--muted); white-space: nowrap; }
+
+  /* Skill chips in results */
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip {
+    display: inline-flex; padding: 3px 10px; border-radius: 100px;
+    font-size: 0.75rem; font-weight: 500;
+  }
+  .chip-match { background: rgba(52,211,153,0.12); color: var(--accent3); }
+  .chip-missing { background: rgba(245,158,11,0.12); color: var(--warn); }
+  .chip-count { background: rgba(239,68,68,0.1); color: var(--danger); }
+
+  .chips-section { margin-bottom: 8px; }
+  .chips-label { font-size: 0.7rem; color: var(--muted); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+  /* Roadmap view */
+  .roadmap-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+  }
+  .roadmap-item {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 14px; padding: 20px;
+    transition: all 0.2s;
+    animation: slideIn 0.3s ease both;
+  }
+  .roadmap-item:hover { border-color: rgba(99,120,255,0.35); transform: translateY(-2px); }
+  .roadmap-rank {
+    font-family: 'Syne', sans-serif; font-size: 0.7rem; font-weight: 700;
+    color: var(--accent); text-transform: uppercase; letter-spacing: 1px;
+    margin-bottom: 8px;
+  }
+  .roadmap-skill {
+    font-size: 1rem; font-weight: 600; margin-bottom: 8px; color: var(--text);
+  }
+  .roadmap-bar-wrap {
+    background: rgba(255,255,255,0.06); border-radius: 100px; height: 4px; margin-bottom: 6px;
+  }
+  .roadmap-bar {
+    height: 4px; border-radius: 100px;
+    background: linear-gradient(90deg, var(--warn), var(--accent2));
+  }
+  .roadmap-note { font-size: 0.78rem; color: var(--muted); }
+
+  /* Explorer section */
+  .explorer-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 16px;
+  }
+  .job-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 14px; padding: 20px; cursor: pointer;
+    transition: all 0.22s; position: relative; overflow: hidden;
+    animation: fadeIn 0.4s ease both;
+  }
+  .job-card:hover { border-color: rgba(99,120,255,0.35); transform: translateY(-3px); box-shadow: 0 12px 40px rgba(99,120,255,0.12); }
+  .job-card-cat {
+    font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;
+    margin-bottom: 8px;
+  }
+  .job-card-title {
+    font-family: 'Syne', sans-serif; font-size: 0.95rem; font-weight: 700;
+    margin-bottom: 12px; line-height: 1.4;
+  }
+  .job-card-skills { display: flex; flex-wrap: wrap; gap: 5px; }
+  .job-skill-chip {
+    background: var(--tag-bg); color: var(--muted);
+    padding: 2px 8px; border-radius: 100px; font-size: 0.72rem;
+  }
+
+  /* Category colors */
+  .cat-HR { color: #a78bfa; }
+  .cat-IT { color: #34d399; }
+  .cat-FINANCE { color: #f59e0b; }
+  .cat-SALES { color: #38bdf8; }
+  .cat-BD { color: #fb7185; }
+
+  /* Empty state */
+  .empty-state {
+    text-align: center; padding: 60px 20px; color: var(--muted);
+  }
+  .empty-icon { font-size: 3rem; margin-bottom: 16px; opacity: 0.5; }
+  .empty-title { font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 700; margin-bottom: 8px; }
+  .empty-sub { font-size: 0.9rem; }
+
+  /* Tabs */
+  .tabs { display: flex; gap: 4px; background: var(--surface2); padding: 4px; border-radius: 12px; margin-bottom: 28px; width: fit-content; }
+  .tab {
+    padding: 10px 24px; border-radius: 9px; cursor: pointer;
+    font-family: 'DM Sans', sans-serif; font-size: 0.88rem; font-weight: 500;
+    color: var(--muted); border: none; background: none; transition: all 0.2s;
+  }
+  .tab.active { background: var(--accent); color: #fff; box-shadow: 0 4px 16px rgba(99,120,255,0.35); }
+
+  /* Page sections */
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* Loading */
+  .loading {
+    display: flex; align-items: center; justify-content: center;
+    gap: 12px; padding: 40px; color: var(--muted); font-size: 0.9rem;
+  }
+  .spinner {
+    width: 24px; height: 24px; border-radius: 50%;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Animations */
+  @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+
+  /* Search */
+  .search-box {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 12px; padding: 12px 16px;
+    display: flex; align-items: center; gap: 12px; margin-bottom: 24px;
+  }
+  .search-box input {
+    flex: 1; background: none; border: none; outline: none;
+    color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 0.95rem;
+  }
+  .search-box input::placeholder { color: var(--muted); }
+  .search-icon { color: var(--muted); font-size: 1.1rem; }
+
+  /* Modal */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(8px); z-index: 200; display: none;
+    align-items: center; justify-content: center; padding: 24px;
+  }
+  .modal-overlay.open { display: flex; animation: fadeIn 0.2s ease; }
+  .modal {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 20px; padding: 32px; max-width: 640px; width: 100%;
+    max-height: 80vh; overflow-y: auto;
+    animation: fadeUp 0.3s ease;
+    box-shadow: 0 32px 80px rgba(0,0,0,0.5);
+  }
+  .modal-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 24px; }
+  .modal-close { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 1.4rem; transition: color 0.2s; }
+  .modal-close:hover { color: var(--text); }
+  .modal-title { font-family: 'Syne', sans-serif; font-size: 1.3rem; font-weight: 700; line-height: 1.3; }
+  .modal-cat { font-size: 0.8rem; color: var(--muted); margin-top: 4px; }
+
+  /* Footer */
+  footer {
+    border-top: 1px solid var(--border); padding: 40px 24px;
+    text-align: center; color: var(--muted); font-size: 0.85rem;
+  }
+  footer strong { color: var(--accent2); }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--surface); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  /* Match score colors */
+  .score-high { color: var(--accent3); }
+  .score-med { color: var(--accent); }
+  .score-low { color: var(--warn); }
+
+  .no-results { padding: 40px; text-align: center; color: var(--muted); }
+
+  .tooltip {
+    position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%);
+    background: var(--surface2); border: 1px solid var(--border);
+    padding: 6px 12px; border-radius: 8px; font-size: 0.78rem; white-space: nowrap;
+    pointer-events: none; opacity: 0; transition: opacity 0.2s;
+    z-index: 10;
+  }
+  .has-tooltip:hover .tooltip { opacity: 1; }
+
+  @media (max-width: 600px) {
+    .hero h1 { font-size: 2.2rem; }
+    .stats-bar { gap: 24px; }
+    .matcher-layout { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+<div class="orb orb3"></div>
+
+<nav>
+  <div class="nav-inner">
+    <a class="logo" href="#" onclick="showPage('home')">SkillMap<span> AI</span></a>
+    <div class="nav-links">
+      <button class="nav-link active" id="nav-home" onclick="showPage('home')">Home</button>
+      <button class="nav-link" id="nav-match" onclick="showPage('match')">Skill Matcher</button>
+      <button class="nav-link" id="nav-explore" onclick="showPage('explore')">Explore Jobs</button>
+      <button class="nav-link" id="nav-roadmap" onclick="showPage('roadmap')">Roadmap</button>
+    </div>
+    <button class="nav-cta" onclick="showPage('match')">Get Started →</button>
+  </div>
+</nav>
+
+<!-- HOME PAGE -->
+<div id="page-home" class="page active">
+  <div class="wrapper">
+    <section class="hero">
+      <div class="hero-badge">Powered by AI — 1,167 Real Job Listings</div>
+      <h1>Map Your Skills.<br><em>Navigate Your Career.</em></h1>
+      <p>Enter your current skills and instantly discover matching jobs, identify skill gaps, and get a personalized learning roadmap.</p>
+      <div class="hero-actions">
+        <button class="btn btn-primary" onclick="showPage('match')">Analyze My Skills →</button>
+        <button class="btn btn-outline" onclick="showPage('explore')">Explore Jobs</button>
+      </div>
+    </section>
+
+    <div class="stats-bar">
+      <div class="stat"><div class="stat-value">1,167</div><div class="stat-label">Job Listings</div></div>
+      <div class="stat"><div class="stat-value">4,984</div><div class="stat-label">Unique Skills</div></div>
+      <div class="stat"><div class="stat-value">5</div><div class="stat-label">Job Categories</div></div>
+      <div class="stat"><div class="stat-value">AI</div><div class="stat-label">Powered Matching</div></div>
+    </div>
+
+    <section class="section">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px;">
+        <div class="card" style="cursor:pointer" onclick="showPage('match')">
+          <div style="font-size:2rem;margin-bottom:16px;">🎯</div>
+          <div style="font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:700;margin-bottom:8px;">Skill Matcher</div>
+          <div style="color:var(--muted);font-size:0.9rem;line-height:1.6;">Enter your skills and get instant job matches ranked by compatibility score.</div>
+          <div style="margin-top:16px;color:var(--accent);font-size:0.85rem;font-weight:600;">Try it now →</div>
+        </div>
+        <div class="card" style="cursor:pointer" onclick="showPage('explore')">
+          <div style="font-size:2rem;margin-bottom:16px;">🔭</div>
+          <div style="font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:700;margin-bottom:8px;">Job Explorer</div>
+          <div style="color:var(--muted);font-size:0.9rem;line-height:1.6;">Browse all 1,167 jobs across 5 industries, filter by category and search by skill.</div>
+          <div style="margin-top:16px;color:var(--accent);font-size:0.85rem;font-weight:600;">Explore jobs →</div>
+        </div>
+        <div class="card" style="cursor:pointer" onclick="showPage('roadmap')">
+          <div style="font-size:2rem;margin-bottom:16px;">🗺️</div>
+          <div style="font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:700;margin-bottom:8px;">Skill Roadmap</div>
+          <div style="color:var(--muted);font-size:0.9rem;line-height:1.6;">Get a prioritized list of skills to learn based on your target job category.</div>
+          <div style="margin-top:16px;color:var(--accent);font-size:0.85rem;font-weight:600;">Build roadmap →</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Category cards -->
+    <section class="section">
+      <div class="section-title">Browse by Industry</div>
+      <div class="section-sub">Click a category to explore jobs in that field</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;">
+        <div class="card cat-card" data-cat="HR" onclick="exploreCat('HR')" style="cursor:pointer;text-align:center;">
+          <div style="font-size:2.5rem;margin-bottom:12px;">👥</div>
+          <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;" class="cat-HR">Human Resources</div>
+          <div style="color:var(--muted);font-size:0.82rem;margin-top:4px;">220 positions</div>
+        </div>
+        <div class="card cat-card" data-cat="IT" onclick="exploreCat('INFORMATION-TECHNOLOGY')" style="cursor:pointer;text-align:center;">
+          <div style="font-size:2.5rem;margin-bottom:12px;">💻</div>
+          <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;" class="cat-IT">Information Technology</div>
+          <div style="color:var(--muted);font-size:0.82rem;margin-top:4px;">240 positions</div>
+        </div>
+        <div class="card cat-card" data-cat="FINANCE" onclick="exploreCat('FINANCE')" style="cursor:pointer;text-align:center;">
+          <div style="font-size:2.5rem;margin-bottom:12px;">💰</div>
+          <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;" class="cat-FINANCE">Finance</div>
+          <div style="color:var(--muted);font-size:0.82rem;margin-top:4px;">236 positions</div>
+        </div>
+        <div class="card cat-card" data-cat="SALES" onclick="exploreCat('SALES')" style="cursor:pointer;text-align:center;">
+          <div style="font-size:2.5rem;margin-bottom:12px;">📈</div>
+          <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;" class="cat-SALES">Sales</div>
+          <div style="color:var(--muted);font-size:0.82rem;margin-top:4px;">232 positions</div>
+        </div>
+        <div class="card cat-card" data-cat="BD" onclick="exploreCat('BUSINESS-DEVELOPMENT')" style="cursor:pointer;text-align:center;">
+          <div style="font-size:2.5rem;margin-bottom:12px;">🚀</div>
+          <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;" class="cat-BD">Business Dev</div>
+          <div style="color:var(--muted);font-size:0.82rem;margin-top:4px;">239 positions</div>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<!-- SKILL MATCHER PAGE -->
+<div id="page-match" class="page">
+  <div class="wrapper">
+    <div class="section">
+      <div class="section-title">Skill Matcher</div>
+      <div class="section-sub">Type your skills below to find matching jobs and see your skill gaps</div>
+
+      <div class="matcher-layout">
+        <!-- Left: Input -->
+        <div>
+          <div class="card" style="margin-bottom:20px;">
+            <div class="card-title">Your Skills</div>
+            <div style="margin: 12px 0 16px;">
+              <div class="autocomplete" id="autocomplete-wrap">
+                <div class="skill-input-wrap" id="inputWrap" onclick="document.getElementById('skillInput').focus()">
+                  <div class="skill-tags" id="skillTags"></div>
+                  <input type="text" id="skillInput" class="skill-input" placeholder="Type a skill and press Enter..." autocomplete="off">
+                </div>
+                <div class="autocomplete-list" id="autocompleteList"></div>
+              </div>
+              <div style="font-size:0.78rem;color:var(--muted);margin-top:8px;">Press Enter or comma to add a skill</div>
+            </div>
+
+            <div>
+              <div style="font-size:0.78rem;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px;">Popular Skills</div>
+              <div class="suggest-row" id="suggestionChips"></div>
+            </div>
+          </div>
+
+          <!-- Category filter for suggestions -->
+          <div class="card">
+            <div class="card-title">Filter Results by Category</div>
+            <div class="filter-row" style="margin-top: 12px;">
+              <button class="filter-btn active" onclick="setFilter('ALL')">All</button>
+              <button class="filter-btn" onclick="setFilter('HR')">HR</button>
+              <button class="filter-btn" onclick="setFilter('INFORMATION-TECHNOLOGY')">IT</button>
+              <button class="filter-btn" onclick="setFilter('FINANCE')">Finance</button>
+              <button class="filter-btn" onclick="setFilter('SALES')">Sales</button>
+              <button class="filter-btn" onclick="setFilter('BUSINESS-DEVELOPMENT')">Biz Dev</button>
+            </div>
+            <div style="margin-top:16px;font-size:0.82rem;color:var(--muted);" id="matchStats"></div>
+          </div>
+        </div>
+
+        <!-- Right: Results -->
+        <div>
+          <div style="font-family:'Syne',sans-serif;font-weight:700;margin-bottom:16px;font-size:1rem;" id="resultsHeading">Results will appear here</div>
+          <div id="resultsContainer">
+            <div class="empty-state">
+              <div class="empty-icon">🎯</div>
+              <div class="empty-title">Add some skills to get started</div>
+              <div class="empty-sub">We'll match you to real job listings from our database</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- EXPLORE PAGE -->
+<div id="page-explore" class="page">
+  <div class="wrapper">
+    <div class="section">
+      <div class="section-title">Explore Jobs</div>
+      <div class="section-sub">Browse all 1,167 job listings from our dataset</div>
+
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="exploreSearch" placeholder="Search by job title or skill..." oninput="renderExplorer()">
+      </div>
+
+      <div class="filter-row" id="exploreFilters">
+        <button class="filter-btn active" onclick="setExploreFilter('ALL')">All (1167)</button>
+        <button class="filter-btn" onclick="setExploreFilter('HR')">HR (220)</button>
+        <button class="filter-btn" onclick="setExploreFilter('INFORMATION-TECHNOLOGY')">IT (240)</button>
+        <button class="filter-btn" onclick="setExploreFilter('FINANCE')">Finance (236)</button>
+        <button class="filter-btn" onclick="setExploreFilter('SALES')">Sales (232)</button>
+        <button class="filter-btn" onclick="setExploreFilter('BUSINESS-DEVELOPMENT')">Biz Dev (239)</button>
+      </div>
+
+      <div style="color:var(--muted);font-size:0.85rem;margin-bottom:16px;" id="exploreCount"></div>
+      <div class="explorer-grid" id="explorerGrid"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ROADMAP PAGE -->
+<div id="page-roadmap" class="page">
+  <div class="wrapper">
+    <div class="section">
+      <div class="section-title">Skill Roadmap Builder</div>
+      <div class="section-sub">Choose a target role category and see the most in-demand skills to learn</div>
+
+      <div class="card" style="margin-bottom:32px;">
+        <div class="card-title">Target Category</div>
+        <div class="filter-row" style="margin-top:12px;">
+          <button class="filter-btn active" id="rm-HR" onclick="setRoadmapCat('HR')">Human Resources</button>
+          <button class="filter-btn" id="rm-INFORMATION-TECHNOLOGY" onclick="setRoadmapCat('INFORMATION-TECHNOLOGY')">Information Technology</button>
+          <button class="filter-btn" id="rm-FINANCE" onclick="setRoadmapCat('FINANCE')">Finance</button>
+          <button class="filter-btn" id="rm-SALES" onclick="setRoadmapCat('SALES')">Sales</button>
+          <button class="filter-btn" id="rm-BUSINESS-DEVELOPMENT" onclick="setRoadmapCat('BUSINESS-DEVELOPMENT')">Business Development</button>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:32px;">
+        <div class="card-title">Your Current Skills (Optional)</div>
+        <div class="autocomplete" id="rm-autocomplete">
+          <div class="skill-input-wrap" id="rmInputWrap" onclick="document.getElementById('rmSkillInput').focus()">
+            <div class="skill-tags" id="rmSkillTags"></div>
+            <input type="text" id="rmSkillInput" class="skill-input" placeholder="Add your current skills to see gap..." autocomplete="off">
+          </div>
+          <div class="autocomplete-list" id="rmAutocompleteList"></div>
+        </div>
+      </div>
+
+      <div id="roadmapContent"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modal" onclick="closeModal(event)">
+  <div class="modal" id="modalContent">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="modalTitle"></div>
+        <div class="modal-cat" id="modalCat"></div>
+      </div>
+      <button class="modal-close" onclick="document.getElementById('modal').classList.remove('open')">✕</button>
+    </div>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
+<footer>
+  <div>Built with ❤️ for the <strong>SkillMap AI</strong> Hackathon · 1,167 real job listings · AI-powered skill matching</div>
+</footer>
+
+<script src="data.js"></script>
+<script>
+// ===== DATA =====
+let JOBS = [];
+let ALL_SKILLS = [];
+let SUGGESTIONS = {};
+
+// State
+let userSkills = [];
+let matchFilter = 'ALL';
+let exploreFilter = 'ALL';
+let roadmapCat = 'HR';
+let rmUserSkills = [];
+
+// Category labels
+const CAT_LABELS = {
+  'HR': 'Human Resources',
+  'INFORMATION-TECHNOLOGY': 'Information Technology',
+  'FINANCE': 'Finance',
+  'SALES': 'Sales',
+  'BUSINESS-DEVELOPMENT': 'Business Development'
+};
+const CAT_ICONS = {
+  'HR': '👥',
+  'INFORMATION-TECHNOLOGY': '💻',
+  'FINANCE': '💰',
+  'SALES': '📈',
+  'BUSINESS-DEVELOPMENT': '🚀'
+};
+
+// ===== NAVIGATION =====
+function showPage(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  const navEl = document.getElementById('nav-' + page);
+  if (navEl) navEl.classList.add('active');
+  window.scrollTo(0, 0);
+  if (page === 'explore') renderExplorer();
+  if (page === 'roadmap') renderRoadmap();
+}
+
+function exploreCat(cat) {
+  exploreFilter = cat;
+  showPage('explore');
+  renderExplorer();
+  document.querySelectorAll('#exploreFilters .filter-btn').forEach(b => b.classList.remove('active'));
+  const catMap = {
+    'HR': 1, 'INFORMATION-TECHNOLOGY': 2, 'FINANCE': 3, 'SALES': 4, 'BUSINESS-DEVELOPMENT': 5
+  };
+  const btns = document.querySelectorAll('#exploreFilters .filter-btn');
+  if (cat === 'ALL') btns[0].classList.add('active');
+  else if (catMap[cat]) btns[catMap[cat]].classList.add('active');
+}
+
+// ===== MATCHING ALGORITHM =====
+function cosineSimilarity(setA, setB) {
+  if (!setA.size || !setB.size) return 0;
+  const intersection = [...setA].filter(s => setB.has(s)).length;
+  return intersection / Math.sqrt(setA.size * setB.size);
+}
+
+function matchJobs(skills) {
+  if (!skills.length) return [];
+  const userSet = new Set(skills.map(s => s.toLowerCase().trim()));
+  
+  return JOBS.map(job => {
+    const jobSet = new Set(job.skills);
+    const sim = cosineSimilarity(userSet, jobSet);
+    const matched = [...userSet].filter(s => jobSet.has(s));
+    const missing = [...jobSet].filter(s => !userSet.has(s));
+    const matchPct = jobSet.size > 0 ? Math.round(matched.length / jobSet.size * 100) : 0;
+    return { ...job, sim, matched, missing, matchPct };
+  })
+  .filter(j => j.sim > 0)
+  .sort((a, b) => b.sim - a.sim);
+}
+
+// ===== SKILL INPUT =====
+// Registry so one global removeSkill can serve both Skill Matcher and Roadmap inputs
+window._skillInputRegistry = {};
+window.removeSkill = function(i, srcId) {
+  const reg = window._skillInputRegistry[srcId];
+  if (!reg) return;
+  reg.skillsArr.splice(i, 1);
+  const tagsCont = document.getElementById(reg.tagsId);
+  if (tagsCont) {
+    tagsCont.innerHTML = reg.skillsArr.map((s, idx) =>
+      `<span class="skill-tag">${s} <span class="rm" onclick="removeSkill(${idx},'${srcId}')">×</span></span>`
+    ).join('');
+  }
+  reg.onUpdate();
+};
+
+function setupSkillInput(inputId, tagsId, listId, skillsArr, onUpdate) {
+  const input = document.getElementById(inputId);
+  const tagsCont = document.getElementById(tagsId);
+  const list = document.getElementById(listId);
+  let acIdx = -1;
+
+  window._skillInputRegistry[inputId] = { skillsArr, tagsId, onUpdate };
+
+  function renderTags() {
+    tagsCont.innerHTML = skillsArr.map((s, i) =>
+      `<span class="skill-tag">${s} <span class="rm" onclick="removeSkill(${i},'${inputId}')">×</span></span>`
+    ).join('');
+    onUpdate();
+  }
+
+  function addSkill(skill) {
+    skill = skill.toLowerCase().trim();
+    if (skill && !skillsArr.includes(skill)) {
+      skillsArr.push(skill);
+      renderTags();
+    }
+    input.value = '';
+    hideList();
+  }
+
+  function showList(matches) {
+    if (!matches.length) { hideList(); return; }
+    list.innerHTML = matches.slice(0, 8).map((s, i) =>
+      `<div class="autocomplete-item" onclick="acSelect('${s.replace(/'/g,"\\'")}','${inputId}')">${s}</div>`
+    ).join('');
+    list.classList.add('show');
+    acIdx = -1;
+  }
+  function hideList() { list.classList.remove('show'); acIdx = -1; }
+
+  window.acSelect = (skill, srcId) => {
+    if (srcId === inputId) { addSkill(skill); }
+  };
+
+  input.addEventListener('keydown', e => {
+    const items = list.querySelectorAll('.autocomplete-item');
+    if (e.key === 'ArrowDown') { e.preventDefault(); acIdx = Math.min(acIdx+1, items.length-1); items.forEach((el,i)=>el.classList.toggle('focused',i===acIdx)); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); acIdx = Math.max(acIdx-1, -1); items.forEach((el,i)=>el.classList.toggle('focused',i===acIdx)); }
+    else if ((e.key === 'Enter' || e.key === ',') && input.value.trim()) {
+      e.preventDefault();
+      if (acIdx >= 0 && items[acIdx]) addSkill(items[acIdx].textContent.trim().replace(/^\+ ?/,''));
+      else addSkill(input.value.replace(/,/g,'').trim());
+    } else if (e.key === 'Backspace' && !input.value && skillsArr.length) {
+      skillsArr.pop(); renderTags();
+    } else if (e.key === 'Escape') hideList();
+  });
+
+  input.addEventListener('input', () => {
+    const q = input.value.toLowerCase().trim();
+    if (q.length < 1) { hideList(); return; }
+    const matches = ALL_SKILLS.filter(s => s.includes(q) && !skillsArr.includes(s));
+    showList(matches);
+  });
+
+  document.addEventListener('click', e => {
+    if (!e.target.closest('#' + inputId) && !e.target.closest('#' + listId)) hideList();
+  });
+
+  renderTags();
+}
+
+// ===== RESULTS RENDERING =====
+function renderResults() {
+  const container = document.getElementById('resultsContainer');
+  const heading = document.getElementById('resultsHeading');
+
+  if (!userSkills.length) {
+    container.innerHTML = `<div class="empty-state"><div class="empty-icon">🎯</div><div class="empty-title">Add some skills to get started</div><div class="empty-sub">We'll match you to real job listings from our database</div></div>`;
+    heading.textContent = 'Results will appear here';
+    document.getElementById('matchStats').textContent = '';
+    return;
+  }
+
+  let matches = matchJobs(userSkills);
+  if (matchFilter !== 'ALL') matches = matches.filter(j => j.category === matchFilter);
+  
+  const top = matches.slice(0, 20);
+  document.getElementById('matchStats').textContent = `${matches.length} jobs match your ${userSkills.length} skill${userSkills.length>1?'s':''}`;
+  heading.textContent = `Top ${Math.min(20, matches.length)} Matches`;
+
+  if (!top.length) {
+    container.innerHTML = `<div class="no-results">No matches found for the selected filters. Try removing the category filter.</div>`;
+    return;
+  }
+
+  container.innerHTML = `<div class="results-list">${top.map((job, i) => {
+    const pct = Math.round(job.sim * 100);
+    const barClass = pct >= 60 ? 'high' : pct <= 30 ? 'low' : '';
+    const scoreClass = pct >= 60 ? 'score-high' : pct >= 35 ? 'score-med' : 'score-low';
+    const catLabel = CAT_LABELS[job.category] || job.category;
+    const icon = CAT_ICONS[job.category] || '💼';
+    const topMatched = job.matched.slice(0, 4);
+    const topMissing = job.missing.slice(0, 4);
+    
+    return `<div class="result-card" style="animation-delay:${i*0.04}s" onclick="openJobModal(${JOBS.indexOf(job)})">
+      <div class="result-header">
+        <div class="result-icon">${icon}</div>
+        <div style="flex:1">
+          <div class="result-title">${job.title}</div>
+          <div class="result-category">${catLabel}</div>
+        </div>
+        <div class="result-score ${scoreClass}">${pct}%</div>
+      </div>
+      <div class="match-info">
+        <div class="match-bar-wrap"><div class="match-bar ${barClass}" style="width:${Math.max(pct,2)}%"></div></div>
+        <div class="match-pct">${job.matched.length}/${job.skills.length} skills</div>
+      </div>
+      ${topMatched.length ? `<div class="chips-section"><div class="chips-label">✓ Matched</div><div class="chips">${topMatched.map(s=>`<span class="chip chip-match">${s}</span>`).join('')}${job.matched.length>4?`<span class="chip" style="color:var(--muted)">+${job.matched.length-4}</span>`:''}</div></div>` : ''}
+      ${topMissing.length ? `<div class="chips-section"><div class="chips-label">⚡ To Learn</div><div class="chips">${topMissing.map(s=>`<span class="chip chip-missing">${s}</span>`).join('')}${job.missing.length>4?`<span class="chip" style="color:var(--muted)">+${job.missing.length-4}</span>`:''}</div></div>` : ''}
+    </div>`;
+  }).join('')}</div>`;
+}
+
+function setFilter(cat) {
+  matchFilter = cat;
+  document.querySelectorAll('#page-match .filter-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  renderResults();
+}
+
+// ===== SUGGESTIONS =====
+function renderSuggestions() {
+  const chips = document.getElementById('suggestionChips');
+  const cat = matchFilter !== 'ALL' ? matchFilter : 'HR';
+  const sug = (SUGGESTIONS[cat] || []).filter(s => !userSkills.includes(s)).slice(0, 12);
+  chips.innerHTML = sug.map(s =>
+    `<span class="suggest-chip" onclick="addSuggestedSkill('${s.replace(/'/g,"\\'")}','main')">${s}</span>`
+  ).join('');
+}
+
+window.addSuggestedSkill = (skill, src) => {
+  if (!userSkills.includes(skill)) {
+    userSkills.push(skill);
+    document.getElementById('skillTags').innerHTML = userSkills.map((s, i) =>
+      `<span class="skill-tag">${s} <span class="rm" onclick="removeSkill(${i},'skillInput')">×</span></span>`
+    ).join('');
+    renderResults();
+    renderSuggestions();
+  }
+};
+
+// ===== EXPLORER =====
+let exploreChunk = 24;
+
+function renderExplorer() {
+  const q = (document.getElementById('exploreSearch')?.value || '').toLowerCase();
+  const grid = document.getElementById('explorerGrid');
+  
+  let jobs = JOBS;
+  if (exploreFilter !== 'ALL') jobs = jobs.filter(j => j.category === exploreFilter);
+  if (q) jobs = jobs.filter(j => j.title.toLowerCase().includes(q) || j.skills.some(s => s.includes(q)));
+
+  document.getElementById('exploreCount').textContent = `Showing ${Math.min(exploreChunk, jobs.length)} of ${jobs.length} jobs`;
+  
+  const slice = jobs.slice(0, exploreChunk);
+  grid.innerHTML = slice.map((job, i) => {
+    const icon = CAT_ICONS[job.category] || '💼';
+    const catClass = job.category === 'INFORMATION-TECHNOLOGY' ? 'cat-IT' : `cat-${job.category.split('-')[0]}`;
+    return `<div class="job-card" style="animation-delay:${(i%8)*0.04}s" onclick="openJobModal(${JOBS.indexOf(job)})">
+      <div class="job-card-cat ${catClass}">${icon} ${CAT_LABELS[job.category]||job.category}</div>
+      <div class="job-card-title">${job.title}</div>
+      <div class="job-card-skills">${job.skills.slice(0,6).map(s=>`<span class="job-skill-chip">${s}</span>`).join('')}${job.skills.length>6?`<span class="job-skill-chip">+${job.skills.length-6}</span>`:''}</div>
+    </div>`;
+  }).join('');
+
+  if (jobs.length > exploreChunk) {
+    grid.insertAdjacentHTML('afterend', `<div style="text-align:center;margin-top:24px"><button class="btn btn-outline" onclick="loadMore()">Load More (${jobs.length - exploreChunk} remaining)</button></div>`);
+  }
+}
+
+window.loadMore = () => { exploreChunk += 24; renderExplorer(); };
+
+function setExploreFilter(cat) {
+  exploreFilter = cat; exploreChunk = 24;
+  document.querySelectorAll('#exploreFilters .filter-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  renderExplorer();
+}
+
+// ===== ROADMAP =====
+function setRoadmapCat(cat) {
+  roadmapCat = cat;
+  document.querySelectorAll('[id^="rm-"]').forEach(b => b.classList.remove('active'));
+  document.getElementById('rm-' + cat)?.classList.add('active');
+  renderRoadmap();
+}
+
+function renderRoadmap() {
+  const cont = document.getElementById('roadmapContent');
+  const jobs = JOBS.filter(j => j.category === roadmapCat);
+  
+  // Count skill frequencies
+  const skillFreq = {};
+  jobs.forEach(j => j.skills.forEach(s => { skillFreq[s] = (skillFreq[s]||0) + 1; }));
+  
+  // Subtract user's existing skills
+  const sorted = Object.entries(skillFreq)
+    .filter(([s]) => !rmUserSkills.includes(s))
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 30);
+  
+  const maxCount = sorted[0]?.[1] || 1;
+  const catLabel = CAT_LABELS[roadmapCat] || roadmapCat;
+  
+  const tiers = [
+    { label: 'Essential', range: [0, 8], desc: 'Core skills needed for most roles', color: '#ef4444' },
+    { label: 'Important', range: [8, 18], desc: 'Strongly recommended skills', color: '#f59e0b' },
+    { label: 'Nice to Have', range: [18, 30], desc: 'Skills that differentiate candidates', color: '#6378ff' },
+  ];
+
+  cont.innerHTML = `
+    <div style="margin-bottom:24px">
+      <div style="font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:700;margin-bottom:4px;">
+        ${catLabel} Skill Roadmap
+      </div>
+      <div style="color:var(--muted);font-size:0.9rem;">Based on analysis of ${jobs.length} ${catLabel} job listings${rmUserSkills.length ? ` · Filtered for your ${rmUserSkills.length} existing skills` : ''}</div>
+    </div>
+    ${tiers.map(tier => {
+      const tierSkills = sorted.slice(tier.range[0], tier.range[1]);
+      if (!tierSkills.length) return '';
+      return `
+        <div style="margin-bottom:32px">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+            <div style="width:10px;height:10px;border-radius:50%;background:${tier.color};flex-shrink:0"></div>
+            <div>
+              <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;">${tier.label}</div>
+              <div style="color:var(--muted);font-size:0.8rem;">${tier.desc}</div>
+            </div>
+          </div>
+          <div class="roadmap-grid">
+            ${tierSkills.map(([skill, count], i) => {
+              const pct = Math.round(count / maxCount * 100);
+              return `<div class="roadmap-item" style="animation-delay:${(tier.range[0]+i)*0.03}s">
+                <div class="roadmap-rank">#{${tier.range[0]+i+1}} Priority</div>
+                <div class="roadmap-skill">${skill}</div>
+                <div class="roadmap-bar-wrap"><div class="roadmap-bar" style="width:${pct}%;background:${tier.color}55;border-right:2px solid ${tier.color}"></div></div>
+                <div class="roadmap-note">Required in ${count}/${jobs.length} jobs (${Math.round(count/jobs.length*100)}%)</div>
+              </div>`;
+            }).join('')}
+          </div>
+        </div>`;
+    }).join('')}
+  `;
+}
+
+// ===== MODAL =====
+function openJobModal(jobIdx) {
+  const job = JOBS[jobIdx];
+  if (!job) return;
+  const modal = document.getElementById('modal');
+  const catLabel = CAT_LABELS[job.category] || job.category;
+  const icon = CAT_ICONS[job.category] || '💼';
+  
+  document.getElementById('modalTitle').textContent = `${icon} ${job.title}`;
+  document.getElementById('modalCat').textContent = catLabel;
+
+  // If user has skills, show match info
+  let matchSection = '';
+  if (userSkills.length) {
+    const userSet = new Set(userSkills);
+    const jobSet = new Set(job.skills);
+    const matched = [...userSet].filter(s => jobSet.has(s));
+    const missing = [...jobSet].filter(s => !userSet.has(s));
+    const pct = jobSet.size > 0 ? Math.round(matched.length / jobSet.size * 100) : 0;
+    matchSection = `
+      <div style="background:var(--surface2);border-radius:12px;padding:20px;margin-bottom:20px">
+        <div style="font-family:'Syne',sans-serif;font-weight:700;margin-bottom:12px;">Your Match Score: <span style="color:var(--accent)">${pct}%</span></div>
+        <div class="match-bar-wrap" style="margin-bottom:12px"><div class="match-bar" style="width:${pct}%"></div></div>
+        ${matched.length ? `<div class="chips-section"><div class="chips-label">✓ Skills you have</div><div class="chips">${matched.map(s=>`<span class="chip chip-match">${s}</span>`).join('')}</div></div>` : ''}
+        ${missing.length ? `<div class="chips-section" style="margin-top:10px"><div class="chips-label">⚡ Skills to learn</div><div class="chips">${missing.map(s=>`<span class="chip chip-missing">${s}</span>`).join('')}</div></div>` : ''}
+      </div>`;
+  }
+
+  document.getElementById('modalBody').innerHTML = `
+    ${matchSection}
+    <div style="margin-bottom:16px">
+      <div style="font-size:0.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;">All Required Skills (${job.skills.length})</div>
+      <div class="chips">${job.skills.map(s => {
+        const isOwned = userSkills.includes(s);
+        return `<span class="chip ${isOwned ? 'chip-match' : 'chip-missing'}">${s}</span>`;
+      }).join('')}</div>
+    </div>
+    <div style="margin-top:20px;padding-top:20px;border-top:1px solid var(--border)">
+      <button class="btn btn-primary" onclick="document.getElementById('modal').classList.remove('open');showPage('match')" style="width:100%;justify-content:center">
+        Analyze This Role →
+      </button>
+    </div>
+  `;
+  modal.classList.add('open');
+}
+
+function closeModal(e) {
+  if (e.target === document.getElementById('modal')) {
+    document.getElementById('modal').classList.remove('open');
+  }
+}
+
+// ===== INIT =====
+function init() {
+  if (typeof JOBS_DATA === 'undefined') {
+    document.body.innerHTML += '<div style="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);color:red;text-align:center">Error: data.js not loaded. Please ensure data.js is in the same folder.</div>';
+    return;
+  }
+  
+  JOBS = JOBS_DATA;
+  ALL_SKILLS = typeof ALL_SKILLS_DATA !== 'undefined' ? ALL_SKILLS_DATA : [...new Set(JOBS.flatMap(j=>j.skills))].sort();
+  SUGGESTIONS = typeof SKILL_SUGGESTIONS !== 'undefined' ? SKILL_SUGGESTIONS : {};
+
+  // Setup skill matcher input
+  setupSkillInput('skillInput', 'skillTags', 'autocompleteList', userSkills, () => {
+    renderResults();
+    renderSuggestions();
+  });
+
+  // Setup roadmap input
+  setupSkillInput('rmSkillInput', 'rmSkillTags', 'rmAutocompleteList', rmUserSkills, () => {
+    renderRoadmap();
+  });
+
+  renderSuggestions();
+  renderExplorer();
+  renderRoadmap();
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
